@@ -46,21 +46,28 @@
             # 1xA6000 48GB, bs=256 OOM
             # 2xA6000 48GB, bs=256 OOM, 代码可能有问题
 
-    # [04/21/2026] 实验，使用新的g1_dex3_gripper_homie_v2.py，states与action输出保持一致, action chunk length=50。
+    # [04/21/2026] 实验，使用新的g1_dex3_gripper_homie_v2.py，states与action输出保持一致, action chunk length=40。
 
         # bs=128, lr=5e-5, 20k step
 
-            # 之前用的action chunk=16, 现在是50， 需要跑一个代码先，重新算数据集的统计信息
+            # 之前用的action chunk=16, 现在是40 (gr00t 原先也是40, 50会报错)， 需要跑一个代码先，重新算数据集的统计信息
                 # See: https://github.com/precognitionlab/Isaac-GR00T-N1.7/blob/main/getting_started/data_config.md#required-fields
 
                 $ rm ~/.cache/huggingface/lerobot/junweiliang/wbc_pick_up_object_from_ground/meta/relative_stats.json
 
                 junweil@office-precognition:~/projects/wbc_manipulation/Isaac-GR00T-N1.7$ uv run python gr00t/data/stats.py --dataset-path ~/.cache/huggingface/lerobot/junweiliang/wbc_pick_up_object_from_ground --embodiment-tag NEW_EMBODIMENT --modality-config-path my_configs/g1_dex3_gripper_homie_v2.py
-                    Loaded modality config: my_configs/g1_dex3_gripper_homie_v2.py
-                    Generating stats for /home/junweil/.cache/huggingface/lerobot/junweiliang/wbc_pick_up_object_from_ground
+
+                # action chunk长度问题：https://github.com/NVIDIA/Isaac-GR00T/issues/644
 
 
+        # 1x4090 48GB, bs=128, 42GB/48GB, 20k steps, 要8小时
 
-        junweil@office-precognition:~/projects/wbc_manipulation/Isaac-GR00T-N1.7$ PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True uv run torchrun --nproc_per_node=1 gr00t/experiment/launch_finetune.py      --base-model-path ../GR00T-N1.7-3B/      --dataset-path ~/.cache/huggingface/lerobot/junweiliang/wbc_pick_up_object_from_ground      --embodiment-tag NEW_EMBODIMENT      --modality-config-path my_configs/g1_dex3_gripper_homie_v2.py      --save-total-limit 1      --learning_rate 5e-5      --save-steps 2000      --max-steps 20000      --use-wandb      --warmup_ratio 0.05      --weight_decay 1e-5      --global-batch-size 128    --color-jitter-params brightness 0.3 contrast 0.4 saturation 0.5 hue 0.08      --dataloader-num-workers 6      --output-dir experiments/my_wbc_pick_up_object_from_ground_bs128_s20k_v2
+            # pick_up_object_from_ground
+
+            junweil@office-precognition:~/projects/wbc_manipulation/Isaac-GR00T-N1.7$ PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True uv run torchrun --nproc_per_node=1 gr00t/experiment/launch_finetune.py      --base-model-path ../GR00T-N1.7-3B/      --dataset-path ~/.cache/huggingface/lerobot/junweiliang/wbc_pick_up_object_from_ground      --embodiment-tag NEW_EMBODIMENT      --modality-config-path my_configs/g1_dex3_gripper_homie_v2.py      --save-total-limit 1      --learning_rate 5e-5      --save-steps 2000      --max-steps 20000      --use-wandb      --warmup_ratio 0.05      --weight_decay 1e-5      --global-batch-size 128    --color-jitter-params brightness 0.3 contrast 0.4 saturation 0.5 hue 0.08      --dataloader-num-workers 6      --output-dir experiments/my_wbc_pick_up_object_from_ground_bs128_s20k_v2
+
+            # close_washer_door
+
+            junweil@office-precognition:~/projects/wbc_manipulation/Isaac-GR00T-N1.7$ CUDA_VISIBLE_DEVICES=1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True uv run torchrun --nproc_per_node=1 --master_port=29501  gr00t/experiment/launch_finetune.py      --base-model-path ../GR00T-N1.7-3B/      --dataset-path ~/.cache/huggingface/lerobot/junweiliang/wbc_close_washer_door      --embodiment-tag NEW_EMBODIMENT      --modality-config-path my_configs/g1_dex3_gripper_homie_v2.py      --save-total-limit 1      --learning_rate 5e-5      --save-steps 2000      --max-steps 20000      --use-wandb      --warmup_ratio 0.05      --weight_decay 1e-5      --global-batch-size 128    --color-jitter-params brightness 0.3 contrast 0.4 saturation 0.5 hue 0.08      --dataloader-num-workers 6      --output-dir experiments/my_wbc_close_washer_door_bs128_s20k_v2
 
 ```
