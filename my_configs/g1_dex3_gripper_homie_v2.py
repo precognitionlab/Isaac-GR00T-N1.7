@@ -19,7 +19,7 @@ g1_wbc_config = {
 
     # ACTION: We restrict the model to ONLY output what you requested.
     "action": ModalityConfig(
-        delta_indices=list(range(0, 50)),
+        delta_indices=list(range(0, 40)),
         modality_keys=[
             "arms",
             "waist",
